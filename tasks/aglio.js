@@ -26,22 +26,14 @@ module.exports = function (grunt) {
       includePath: options.includePath
     };
 
-    // Make sure that the given theme exists
-    aglio.getTemplates(function (err, names) {
-      if (err) {
-        grunt.log.warn(err);
-      }
-      if (!_.contains(names, aglioOptions.template)) {
-        // Is a custom theme file presented
-        aglioOptions.template = path.resolve(aglioOptions.template) + '.jade';
-        if (!grunt.file.exists(aglioOptions.template)) {
-          grunt.log.warn(aglioOptions.template + " theme does not exist, reverting to the default theme");
-          aglioOptions.template = "default";
-        }
-      }
-      // Compile must happen after the template is verified in the callback
-      compile();
-    });
+    try {
+      aglio.getTheme(aglioOptions.template);
+    } catch (err) {
+      grunt.log.warn(err);
+      grunt.log.warn('Could not load theme "' + aglioOptions.template + '", using default.');
+      aglioOptions.template = 'default';
+    }
+    compile();
 
     var getLineNo = function(input, err) {
       if (err.location && err.location.length) {
